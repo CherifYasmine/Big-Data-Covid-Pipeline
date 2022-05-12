@@ -1,0 +1,52 @@
+#!/bin/bash
+cd pipeline
+echo "Big Data Covid Pipeline"
+echo "-------------------"
+sleep 1
+
+echo "1-Starting Hadoop"
+sleep 1
+./start-hadoop.sh
+
+echo "2-Starting Kafka and Zookeeper"
+sleep 1
+./start-kafka-zookeeper.sh
+
+echo "3-Starting Hbase"
+sleep 1
+start-hbase.sh
+
+echo "4-Putting data in HDFS"
+sleep 1
+hadoop fs -rm pipeline/input/covidcases.txt
+hadoop fs -rm -r pipeline/output
+sed '1d' covid.txt > covidcases.txt
+hadoop fs -put covidcases.txt pipeline/input
+
+echo "5-Applying Map Reduce"
+sleep 1
+hadoop jar CasesTotal.jar tn.insat.pipeline.CasesTotal pipeline/input pipeline/output
+
+echo "6-Getting data from HDFS"
+sleep 1
+hadoop fs -getmerge pipeline/output/ covidpercountry.txt
+
+echo "7-Creating table in HBase"
+sleep 1
+java HbaseTable
+
+echo "8-Creating Kafka topic"
+sleep 1
+kafka-topics.sh --zookeeper localhost:2181 --delete --topic covid
+kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic covid
+
+echo "9-Launching Kafka Producer"
+sleep 1
+java -cp "$KAFKA_HOME/libs/*":. CovidProducer covid covidpercountry.txt
+
+echo "10-Launching Kafka Consumer and saving in Hbase"
+sleep 1
+java -cp "/usr/local/hbase/lib/*:$KAFKA_HOME/libs/*":. CovidConsumer covid
+
+echo "Pipeline Done"
+sleep 5
