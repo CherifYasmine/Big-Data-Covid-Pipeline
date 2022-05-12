@@ -25,25 +25,7 @@ public class HbaseTable {
         System.out.println("Creating Table");
         createOrOverwrite(admin, ht);
         System.out.println("Done......");
-        
-        table = connection.getTable(TableName.valueOf(tableName));
-        String s1="america";
-        String s2="1234";
-        try {
-            System.out.println("Adding Row");
-            byte[] row = Bytes.toBytes("cases_"+s1);
-            Put p = new Put(row);
 
-            p.addColumn(family.getBytes(), "country".getBytes(), Bytes.toBytes(s1));
-            p.addColumn(family.getBytes(), "casesNumber".getBytes(), Bytes.toBytes(s2));
-            table.put(p);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            table.close();
-            connection.close();
-        }   
     }
 
     public static void createOrOverwrite(Admin admin, HTableDescriptor table) throws IOException {
