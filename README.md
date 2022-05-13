@@ -11,7 +11,7 @@
 
 ### Architecture
 ![Imgur](https://i.imgur.com/Zgyx7AI.png)
-- We ran the pipeline and these technologies on a 3 docker containers: 1 master and 2 slaves.
+- We ran the pipeline and these technologies on 3 docker containers: 1 master and 2 slaves.
 - Everything is in Java, and the pipeline script is written in shell script.
 - We applied Hadoop's MapReduce on the data, after storing it in HDFS to generate covid cases per country.
 - We sent them to a table in HBase with Kafka.
